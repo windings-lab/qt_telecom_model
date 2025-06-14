@@ -132,12 +132,19 @@ public:
             countryFont.setBold(true);
             countryItem->setFont(countryFont);
 
+            countryItem->setFlags(countryItem->flags() & ~Qt::ItemIsEditable);
+
             for (const CountryData& data : country.data) {
                 for (const Operator& op : data.operators) {
                     QString opStr = QString("%1 (%2-%3)").arg(op.name).arg(data.mcc).arg(op.mnc);
                     QString opIconPath = QString("icons/Operators/%1_%2.png").arg(data.mcc).arg(op.mnc);
+
                     auto* opItem = new QStandardItem(opStr);
+
                     opItem->setIcon(QIcon(opIconPath));
+
+                    opItem->setFlags(opItem->flags() & ~Qt::ItemIsEditable);
+
                     countryItem->appendRow(opItem);
                 }
             }
