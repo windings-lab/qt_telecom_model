@@ -187,8 +187,6 @@ int main(int argc, char *argv[]) {
     QStandardItemModel* model = telecomTreeModel.buildModel(countries);
     treeView.setModel(model);
 
-    treeView.show();
-
     repository.reset();
     countries.clear();
     return app.exec();
