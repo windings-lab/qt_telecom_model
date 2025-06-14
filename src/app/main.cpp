@@ -173,6 +173,8 @@ int main(int argc, char *argv[]) {
 
     QTreeView treeView;
     treeView.setStyleSheet(loadStyleSheet("style/treeview_style.qss"));
+    treeView.setWindowTitle("Telecom Tree");
+    treeView.showMaximized();
 
     const TelecomTreeModel telecomTreeModel;
     QStandardItemModel* model = telecomTreeModel.buildModel(countries);
