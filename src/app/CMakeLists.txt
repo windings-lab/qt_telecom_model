@@ -1,4 +1,13 @@
-qt_add_executable(telecom_tree main.cpp)
+qt_add_executable(telecom_tree)
+
+file(GLOB_RECURSE SOURCES *.cpp)
+file(GLOB_RECURSE HEADERS *.h)
+
+target_sources(telecom_tree
+			   PRIVATE ${SOURCES}
+			   PUBLIC ${HEADERS}
+)
+
 target_link_libraries(telecom_tree PRIVATE
 					  Qt6::Core
 					  $<$<CONFIG:Debug>:Qt6::CorePrivate>
