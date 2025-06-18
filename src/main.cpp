@@ -2,9 +2,9 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 
-#include "TelecomTreeModel.h"
-#include "utility.h"
-#include "Database/SQLiteRepository.h"
+#include "app/TelecomTreeModel.h"
+#include "app/utility.h"
+#include "app/Database/SQLiteRepository.h"
 
 class IDataRepository;
 
