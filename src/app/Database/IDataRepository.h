@@ -13,7 +13,7 @@ public:
 	virtual ~IDataRepository();
 
 protected:
-	explicit IDataRepository(const QString& db_file_path, const QString& db_type);
+	explicit IDataRepository(const QString& db_name, const QString& db_type);
 
 	QSqlDatabase m_Database;
 
