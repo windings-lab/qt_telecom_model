@@ -4,7 +4,7 @@
 #include <QMap>
 
 SqliteRepository::SqliteRepository(const QString& dbFilePath)
-    : IDataRepository(dbFilePath, "QSQLITE")
+    : SqlRepositoryBase(dbFilePath, "QSQLITE")
 {
 }
 

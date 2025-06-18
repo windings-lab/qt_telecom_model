@@ -3,7 +3,8 @@
 #include <QSqlError>
 
 
-IDataRepository::IDataRepository(const QString& db_name, const QString& db_type) : m_Type(db_type)
+SqlRepositoryBase::SqlRepositoryBase(const QString& db_name, const QString& db_type)
+	: m_Type(db_type)
 {
 	m_Database = QSqlDatabase::addDatabase(m_Type);
 	m_Database.setDatabaseName(db_name);
@@ -14,6 +15,10 @@ IDataRepository::IDataRepository(const QString& db_name, const QString& db_type)
 }
 
 IDataRepository::~IDataRepository()
+{
+}
+
+SqlRepositoryBase::~SqlRepositoryBase()
 {
 	m_Database.close();
 	QSqlDatabase::removeDatabase(m_Database.connectionName());

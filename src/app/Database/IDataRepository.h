@@ -9,12 +9,18 @@ class IDataRepository {
 public:
 	virtual QList<Country> loadCountries() = 0;
 
-public:
 	virtual ~IDataRepository();
+};
+
+class SqlRepositoryBase : public IDataRepository {
+public:
+	SqlRepositoryBase() = delete;
+	virtual ~SqlRepositoryBase() override;
 
 protected:
-	explicit IDataRepository(const QString& db_name, const QString& db_type);
+	explicit SqlRepositoryBase(const QString& db_name, const QString& db_type);
 
+protected:
 	QSqlDatabase m_Database;
 
 private:
