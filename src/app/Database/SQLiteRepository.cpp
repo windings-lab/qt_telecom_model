@@ -1,6 +1,7 @@
 #include "SQLiteRepository.h"
 
 #include <QSqlQuery>
+#include <QMap>
 
 SqliteRepository::SqliteRepository(const QString& dbFilePath)
     : IDataRepository(dbFilePath, "QSQLITE")
@@ -17,9 +18,10 @@ QList<Country> SqliteRepository::loadCountries()
     )");
     if (operatorQuery.exec()) {
         while (operatorQuery.next()) {
-            int mcc = operatorQuery.value(0).toInt();
-            int mnc = operatorQuery.value(1).toInt();
-            QString name = operatorQuery.value(2).toString();
+            const int mcc = operatorQuery.value(0).toInt();
+            const int mnc = operatorQuery.value(1).toInt();
+            const QString name = operatorQuery.value(2).toString();
+
             operatorMap[mcc].append({mcc, mnc, name});
         }
     }
@@ -32,11 +34,11 @@ QList<Country> SqliteRepository::loadCountries()
     )");
     if (dataQuery.exec()) {
         while (dataQuery.next()) {
-            int mcc = dataQuery.value(0).toInt();
-            QString code = dataQuery.value(1).toString();
-            int mnc_length = dataQuery.value(3).toInt();
-            QList<Operator> ops = operatorMap.value(mcc);
-            countryDataMap[code].append({mcc, mnc_length, ops});
+            const int mcc = dataQuery.value(0).toInt();
+            const QString code = dataQuery.value(1).toString();
+            const int mnc_length = dataQuery.value(3).toInt();
+
+            countryDataMap[code].append({mcc, mnc_length, operatorMap.value(mcc)});
         }
     }
 
@@ -51,8 +53,9 @@ QList<Country> SqliteRepository::loadCountries()
     )");
     if (countryQuery.exec()) {
         while (countryQuery.next()) {
-            QString code = countryQuery.value(1).toString();
-            QString name = countryQuery.value(2).toString();
+            const QString code = countryQuery.value(1).toString();
+            const QString name = countryQuery.value(2).toString();
+
             countries.append({code, name, countryDataMap.value(code)});
         }
     }

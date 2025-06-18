@@ -6,8 +6,6 @@
 #include "app/utility.h"
 #include "app/Database/SQLiteRepository.h"
 
-class IDataRepository;
-
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
