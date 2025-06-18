@@ -1,77 +1,61 @@
 #include "SQLiteRepository.h"
 
-#include <QSqlError>
 #include <QSqlQuery>
-#include <QSqlDatabase>
 
 SqliteRepository::SqliteRepository(const QString& dbFilePath)
-    : m_DBPath(dbFilePath)
+    : IDataRepository(dbFilePath, "QSQLITE")
 {
-
 }
 
 QList<Country> SqliteRepository::loadCountries()
 {
-    QList<Country> countries;
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(m_DBPath);
-
-    if (!db.open()) {
-        qWarning() << "Failed to open DB:" << db.lastError().text();
-        return countries;
+    // Loading operators
+    QMap<int, QList<Operator>> operatorMap;
+    QSqlQuery operatorQuery(m_Database);
+    operatorQuery.prepare(R"(
+        SELECT mcc, mnc, name FROM operators ORDER BY CAST(mnc AS INTEGER)
+    )");
+    if (operatorQuery.exec()) {
+        while (operatorQuery.next()) {
+            int mcc = operatorQuery.value(0).toInt();
+            int mnc = operatorQuery.value(1).toInt();
+            QString name = operatorQuery.value(2).toString();
+            operatorMap[mcc].append({mcc, mnc, name});
+        }
     }
 
-    QSqlQuery countryQuery(db);
+    // Loading country data
+    QMap<QString, QList<CountryData>> countryDataMap;
+    QSqlQuery dataQuery(m_Database);
+    dataQuery.prepare(R"(
+        SELECT mcc, code, name, mnc_length FROM countries ORDER BY code, mcc
+    )");
+    if (dataQuery.exec()) {
+        while (dataQuery.next()) {
+            int mcc = dataQuery.value(0).toInt();
+            QString code = dataQuery.value(1).toString();
+            int mnc_length = dataQuery.value(3).toInt();
+            QList<Operator> ops = operatorMap.value(mcc);
+            countryDataMap[code].append({mcc, mnc_length, ops});
+        }
+    }
+
+    // Loading countries
+    QList<Country> countries;
+    QSqlQuery countryQuery(m_Database);
     countryQuery.prepare(R"(
         SELECT MIN(mcc) AS mcc, code, MIN(name) AS name, MIN(mnc_length) AS mnc_length
         FROM countries
         GROUP BY code
         ORDER BY name ASC;
     )");
-
-    if (!countryQuery.exec()) return countries;
-
-    while (countryQuery.next()) {
-        QString code = countryQuery.value(1).toString();
-        QString countryName = countryQuery.value(2).toString();
-        QList<CountryData> data;
-
-        QSqlQuery countryDataQuery(db);
-        countryDataQuery.prepare(R"(
-            SELECT mcc, code, name, mnc_length FROM countries
-            WHERE code = :code
-            ORDER BY mcc
-        )");
-        countryDataQuery.bindValue(":code", code);
-        if (!countryDataQuery.exec()) continue;
-
-        while (countryDataQuery.next()) {
-            int mcc = countryDataQuery.value(0).toInt();
-            int mcc_length = countryDataQuery.value(3).toInt();
-            QList<Operator> operators;
-
-            QSqlQuery operatorQuery(db);
-            operatorQuery.prepare(R"(
-                SELECT mcc, mnc, name FROM operators
-                WHERE mcc = :mcc
-                ORDER BY CAST(mnc AS INTEGER);
-            )");
-            operatorQuery.bindValue(":mcc", mcc);
-            if (!operatorQuery.exec()) continue;
-
-            while (operatorQuery.next()) {
-                int mnc = operatorQuery.value(1).toInt();
-                QString operatorName = operatorQuery.value(2).toString();
-                operators.append({mcc, mnc, operatorName});
-            }
-
-            data.append({mcc, mcc_length, operators});
+    if (countryQuery.exec()) {
+        while (countryQuery.next()) {
+            QString code = countryQuery.value(1).toString();
+            QString name = countryQuery.value(2).toString();
+            countries.append({code, name, countryDataMap.value(code)});
         }
-
-        countries.append({code, countryName, data});
     }
 
-    db.close();
     return countries;
 }
